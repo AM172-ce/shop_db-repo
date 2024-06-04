@@ -1,0 +1,29 @@
+version: '1.2'
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: yourdb
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+      - ./app/data:/app/data
+    ports:
+      - "5432:5432"
+
+  app:
+    build: ./app
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/shopdb
+    volumes:
+      - ./app:/app
+    ports:
+      - "8000:8000"
+
+volumes:
+  db_data:
