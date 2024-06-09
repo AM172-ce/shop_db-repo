@@ -1,4 +1,4 @@
-version: '1.2'
+version: '2.4'
 
 services:
   db:
@@ -6,24 +6,26 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: yourdb
+      POSTGRES_DB: shop
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d
-      - ./app/data:/app/data
+      - /mnt/shared:/mnt/shared
     ports:
       - "5432:5432"
 
   app:
-    build: ./app
+    build:
+      context: ./app
+      dockerfile: Dockerfile
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/shopdb
+      DATABASE_URL: postgres://postgres:postgres@db:5432/shop
     volumes:
-      - ./app:/app
+      - /mnt/shared:/mnt/shared
     ports:
-      - "8000:8000"
+     - "8000:8000"
 
 volumes:
   db_data:
