@@ -1,0 +1,61 @@
+employee_number,lastname,firstname,extension,email,office_code,reports_to,job_title
+321021,Thomas,Amber,iCs32,sarah93@example.com,rL005,,Manager
+837675,Pollard,Lauren,YoT53,tvilla@example.org,hO983,321021,Sales Associate
+566125,Johnson,Jeremy,Waj22,brittany11@example.net,xh033,321021,Customer Service Representative
+567217,Travis,Jillian,yLl33,jillianwoods@example.net,xh033,321021,Store Manager
+842319,Moore,Joseph,gsV97,dmunoz@example.net,kN659,321021,Inventory Manager
+171467,Pena,Kim,fua73,hjimenez@example.com,Mg989,321021,Purchasing Manager
+301968,Adams,Raymond,uTo80,murphycatherine@example.com,QE828,321021,Warehouse Supervisor
+826353,Holt,Ashley,qUy91,clarkstacy@example.org,TB590,321021,Cashier
+877838,Mcdonald,Daniel,ynC36,april00@example.net,QE828,321021,Retail Assistant
+324961,Reese,David,FNK77,tiffany73@example.net,rL005,321021,Product Specialist
+341557,Hubbard,Rodney,Bkp01,mhall@example.org,kN659,321021,Marketing Coordinator
+453448,Simmons,Christy,iWy73,mrandall@example.org,Uk308,567217,Shift Leader
+105554,Arroyo,Kevin,PfG04,sarahmoran@example.org,Xf826,321021,Retail Assistant
+430157,Case,Jimmy,ibB83,christopher85@example.com,Ih991,684192,Cash Office Clerk
+821323,Rios,Marvin,NLb14,jonesangela@example.net,Xf826,820249,Brand Ambassador
+658527,Moore,Matthew,XGz05,fryrobert@example.net,QE828,837675,Retail Sales Representative
+201356,Rosales,Tony,Yrq73,jessicacontreras@example.net,QE828,684192,Front End Supervisor
+565698,Harrison,Sean,Crn01,gilbert35@example.net,rL005,945814,Logistics Coordinator
+197472,Bowman,Sara,CKS82,chanson@example.net,Ih991,877838,Sales Support Associate
+182534,Moore,Krista,qgV09,lopezcindy@example.org,Ke384,984863,Cash Office Clerk
+633109,Smith,Denise,wWO44,pbrown@example.org,Ke384,301968,Distribution Center Manager
+140141,Rice,Savannah,JOD12,isabel65@example.com,fA907,684192,Checkout Operator
+984863,Henderson,Shawn,GXo23,thomas64@example.org,Mg989,321021,Cashier
+944419,Nguyen,Steven,gBK02,joshuaruiz@example.org,QE828,321021,Customer Service Representative
+822661,Walker,Scott,Nla17,oblanchard@example.net,fA907,321021,Cashier
+686140,Jackson,Claudia,OWt04,brandon23@example.com,Xf826,321021,Purchasing Manager
+820249,Kelly,Crystal,XuJ05,uhughes@example.org,TB590,321021,Product Specialist
+186599,Cook,Barbara,FZR01,echen@example.org,QE828,877838,Sales Support Associate
+769281,Bennett,Catherine,BJM50,gthomas@example.net,Xf826,820249,Product Advisor
+622723,Yates,Amanda,Orm05,castillodalton@example.com,TB590,837675,Retail Sales Representative
+945814,Morgan,Eric,BZD97,tiffanykey@example.org,te734,321021,Warehouse Supervisor
+569031,Hull,Matthew,VpC47,qanderson@example.org,hO983,984863,Cash Office Clerk
+534340,Hale,Martin,XeG88,cberry@example.org,Xf826,669769,Event Coordinator
+343057,Eaton,Amanda,rWK26,brianachapman@example.com,fA907,877838,Sales Support Associate
+863820,Thompson,Teresa,okZ27,tperez@example.org,fA907,826353,Checkout Operator
+411052,Reed,Brittany,hXx61,fgarcia@example.com,Uk308,669769,Event Coordinator
+392848,Gomez,Lynn,SYD19,pblackburn@example.org,QE828,171467,Vendor Relations Coordinator
+684192,Hodge,Frederick,Bbt01,henrysandra@example.net,By984,321021,Cashier
+190935,Hoffman,Michael,HIK39,stephanie13@example.com,fA907,324961,Brand Ambassador
+669769,Gonzales,Jason,sPK42,denise06@example.com,hO983,321021,Marketing Coordinator
+266299,Arroyo,Eric,ktm59,morganjesse@example.org,Ih991,734541,Inventory Control Specialist
+734352,Castillo,Dustin,NpT78,kirkjonathan@example.org,Ke384,324961,Brand Ambassador
+769369,Clark,Jacqueline,DUt60,david05@example.com,Uk308,686140,Procurement Specialist
+259866,Harris,Kaitlyn,jnJ74,deannagutierrez@example.com,fA907,324961,Brand Ambassador
+473232,Wilson,Eric,gAQ49,urios@example.org,fA907,497419,Department Supervisor
+734541,Fisher,Amber,fan68,hortonluis@example.com,rL005,321021,Inventory Manager
+773414,Osborn,Wanda,hPR07,careyaustin@example.net,TB590,842319,Stockroom Coordinator
+376138,Vasquez,Scott,osd72,ofrench@example.net,Mg989,324961,Brand Ambassador
+835264,Vega,Cheryl,KND26,stephen54@example.net,rL005,324961,Product Advisor
+703124,Mendez,Sara,Oai06,kimberlybyrd@example.com,Ke384,301968,Distribution Center Manager
+629399,Andrews,Krystal,SOv28,margaret85@example.org,Ih991,734541,Inventory Control Specialist
+792145,Miller,Carl,eeJ13,ann43@example.com,La249,105554,Sales Support Associate
+903289,Short,Jacqueline,NmJ99,pbaldwin@example.com,Ke384,497419,Assistant Store Manager
+338578,Potts,Colleen,IvP03,barbara45@example.com,Xf826,321021,Purchasing Manager
+744864,Robinson,Sean,DzT82,jamescourtney@example.com,Ke384,701380,Demonstrator Coordinator
+983751,Davis,Patrick,WEZ88,ericspencer@example.net,fA907,734541,Receiving Clerk
+455369,Campbell,Megan,ReB07,ljohnson@example.org,QE828,669769,Social Media Coordinator
+321531,Yang,Carlos,epR98,fernandopruitt@example.net,te734,301968,Distribution Center Manager
+497419,Henderson,Tanya,gDC16,jacob26@example.com,Ih991,321021,Store Manager
+701380,Townsend,Jennifer,Wmm62,williamskristy@example.org,QE828,321021,Product Specialist
