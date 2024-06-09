@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS offices
     state         VARCHAR(50),
     country       VARCHAR(50) NOT NULL,
     postal_code   VARCHAR(15) NOT NULL,
-    territory     VARCHAR(10) NOT NULL
+    territory     VARCHAR(20) NOT NULL
 );
 
 
@@ -35,7 +35,6 @@ CREATE TABLE IF NOT EXISTS customers
 (
     customer_number       BIGINT      NOT NULL
         PRIMARY KEY,
-    customer_name         VARCHAR(50) NOT NULL,
     contact_lastname      VARCHAR(50),
     contact_firstname     VARCHAR(50),
     phone                 VARCHAR(50) NOT NULL,
@@ -44,7 +43,7 @@ CREATE TABLE IF NOT EXISTS customers
     city                  VARCHAR(50),
     state                 VARCHAR(50),
     postal_code           VARCHAR(15),
-    country               VARCHAR(50) NOT NULL,
+    country               VARCHAR(60) NOT NULL,
     sales_employee_number BIGINT
         CONSTRAINT customers_fk_1
             REFERENCES employees,
@@ -79,7 +78,7 @@ CREATE TABLE IF NOT EXISTS payments
 );
 
 
-CREATE TABLE IF NOT EXISTS product_categories
+CREATE TABLE IF NOT EXISTS production.product_categories
 (
     product_category_code        VARCHAR(15) NOT NULL
         PRIMARY KEY,
@@ -87,11 +86,11 @@ CREATE TABLE IF NOT EXISTS product_categories
     product_category_description TEXT,
     parent_category_code         VARCHAR(15)
         CONSTRAINT product_categories_fk_1
-            REFERENCES product_categories
+            REFERENCES production.product_categories
 );
 
 
-CREATE TABLE IF NOT EXISTS products
+CREATE TABLE IF NOT EXISTS production.products
 (
     product_code          VARCHAR(15) NOT NULL
         PRIMARY KEY,
@@ -101,22 +100,22 @@ CREATE TABLE IF NOT EXISTS products
     quantity_in_stock     BIGINT      NOT NULL,
     product_category_code VARCHAR(15)
         CONSTRAINT products_fk_1
-            REFERENCES product_categories
+            REFERENCES production.product_categories
 );
 
-CREATE TABLE IF NOT EXISTS products_comments
+CREATE TABLE IF NOT EXISTS production.products_comments
 (
     product_code    VARCHAR(15) NOT NULL
-        REFERENCES products,
+        REFERENCES production.products,
     customer_number BIGINT      NOT NULL
-        REFERENCES public.customers,
+        REFERENCES customers,
     comments        TEXT,
     rates           integer     NOT NULL,
     PRIMARY KEY (product_code, customer_number)
 );
 
 
-CREATE TABLE IF NOT EXISTS discount_units
+CREATE TABLE IF NOT EXISTS production.discount_units
 (
     discount_unit_code VARCHAR(1) NOT NULL
         PRIMARY KEY,
@@ -124,35 +123,35 @@ CREATE TABLE IF NOT EXISTS discount_units
 );
 
 
-CREATE TABLE IF NOT EXISTS products_discount
+CREATE TABLE IF NOT EXISTS production.products_discount
 (
     product_discount_code BIGINT         NOT NULL
         CONSTRAINT product_discount_pk
             PRIMARY KEY,
     product_code          VARCHAR(15)    NOT NULL
         CONSTRAINT product_discount_fk_1
-            REFERENCES products,
+            REFERENCES production.products,
     discount_value        NUMERIC(10, 2) NOT NULL,
     discount_unit         VARCHAR(1)     NOT NULL
         CONSTRAINT products_discount_fk_2
-            REFERENCES discount_units,
+            REFERENCES production.discount_units,
    date_created           TIMESTAMP      NOT NULL,
     valid_until           TIMESTAMP      NOT NULL,
     discount_description  TEXT,
     CONSTRAINT product_discount_unique UNIQUE (product_code,date_created, valid_until)
 );
 
-CREATE TABLE IF NOT EXISTS product_categories_discount
+CREATE TABLE IF NOT EXISTS production.product_categories_discount
 (
     product_categories_discount_code BIGINT         NOT NULL
         PRIMARY KEY,
     product_categories_code          VARCHAR(15)    NOT NULL
         CONSTRAINT product_categories_discount_fk_1
-            REFERENCES product_categories,
+            REFERENCES production.product_categories,
     discount_value                   NUMERIC(10, 2) NOT NULL,
     discount_unit                    VARCHAR(1)     NOT NULL
         CONSTRAINT product_categories_discount_fk_2
-            REFERENCES discount_units,
+            REFERENCES production.discount_units,
     date_created                     TIMESTAMP      NOT NULL,
     valid_until                      TIMESTAMP      NOT NULL,
     discount_description             TEXT,
@@ -160,13 +159,13 @@ CREATE TABLE IF NOT EXISTS product_categories_discount
 );
 
 
-CREATE TABLE IF NOT EXISTS products_pricing
+CREATE TABLE IF NOT EXISTS production.products_pricing
 (
     products_pricing_code BIGINT         NOT NULL
         PRIMARY KEY,
     products_code         VARCHAR(15)    NOT NULL
         CONSTRAINT products_pricing_fk_1
-            REFERENCES products,
+            REFERENCES production.products,
     base_price            NUMERIC(10, 2) NOT NULL,
     date_created          TIMESTAMP      NOT NULL,
     date_expiry           TIMESTAMP,
@@ -183,7 +182,7 @@ CREATE TABLE IF NOT EXISTS order_details
             REFERENCES orders,
     product_code      VARCHAR(15)    NOT NULL
         CONSTRAINT order_details_fk_2
-            REFERENCES products,
+            REFERENCES production.products,
     quantity_ordered  BIGINT         NOT NULL,
     price_each        NUMERIC(10, 2) NOT NULL,
     order_line_number integer        NOT NULL,
@@ -198,14 +197,10 @@ CREATE TABLE IF NOT EXISTS office_buys
     buy_date       TIMESTAMP,
     product_code    VARCHAR(15)
         CONSTRAINT office_buys_fk_1
-            REFERENCES products,
+            REFERENCES production.products,
     buy_quantity    BIGINT,
     buy_price       NUMERIC(10, 2),
     office_code     VARCHAR(10)
         CONSTRAINT office_buys_fk_2
             REFERENCES offices
 );
-
-
-
-
