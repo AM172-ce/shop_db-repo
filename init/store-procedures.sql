@@ -34,3 +34,61 @@ BEGIN
     PERFORM load_table_from_csv('public', 'office_buys', base_path || 'office_buys.csv');
 END;
 $$;
+
+--store-prcedure to calculate yearly customers who had the most discounts.
+CREATE OR REPLACE PROCEDURE calculate_yearly_customer_discounts()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DROP TABLE IF EXISTS temp_yearly_customer_discounts;
+    CREATE TEMP TABLE temp_yearly_customer_discounts (
+        customer_number INT,
+        contact_firstname VARCHAR,
+        contact_lastname VARCHAR,
+        total_discount NUMERIC(10, 2)
+    );
+
+    INSERT INTO temp_yearly_customer_discounts
+    SELECT
+        c.customer_number,
+        c.contact_firstname,
+        c.contact_lastname,
+        SUM(
+            CASE
+                WHEN pd.discount_unit = 'P' THEN ((pd.discount_value / 100.0) * od.price_each) * od.quantity_ordered
+                WHEN pd.discount_unit = 'A' THEN pd.discount_value * od.quantity_ordered
+                ELSE 0
+            END
+        )::numeric(10, 2) AS total_discount
+    FROM
+        customers c
+    JOIN
+        orders o ON c.customer_number = o.customer_number
+    JOIN
+        order_details od ON o.order_number = od.order_number
+    LEFT JOIN
+        production.products_discount pd ON od.product_code = pd.product_code
+        AND o.order_date BETWEEN pd.date_created AND pd.valid_until
+    WHERE
+        o.status = 'Shipped'
+        AND o.shipped_date BETWEEN CURRENT_DATE - INTERVAL '1 year' AND CURRENT_DATE
+    GROUP BY
+        c.customer_number
+    HAVING
+        SUM(
+            CASE
+                WHEN pd.discount_unit = 'P' THEN ((pd.discount_value / 100.0) * od.price_each) * od.quantity_ordered
+                WHEN pd.discount_unit = 'A' THEN pd.discount_value * od.quantity_ordered
+                ELSE 0
+            END
+        ) != 0
+    ORDER BY
+        total_discount DESC;
+END;
+$$;
+
+-- Call the procedure
+CALL calculate_yearly_customer_discounts();
+
+-- Retrieve the results
+SELECT * FROM temp_yearly_customer_discounts;

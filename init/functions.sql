@@ -19,7 +19,7 @@ BEGIN
         SELECT
             c.customer_number,
             c.city,
-            TO_CHAR(DATE_TRUNC(''month''::text, o.order_date::timestamp without time zone), ''Month'') AS order_month,
+            TO_CHAR(DATE_TRUNC(''month'', o.shipped_date), ''YYYY-Month'') AS active_month,
             COUNT(DISTINCT o.order_number) AS orders_count
         FROM
             customers c
@@ -29,7 +29,7 @@ BEGIN
             o.status = ''Shipped''
             AND c.city = ''%s''
         GROUP BY
-            c.customer_number, c.city, order_month
+            c.customer_number, c.city, active_month
         HAVING
             COUNT(DISTINCT o.order_number) >= 1;
     ', city_name, city_name);
@@ -38,13 +38,92 @@ END
 $$ LANGUAGE plpgsql;
 
 
+-- The function return the top 10 customers who have made the most purchases in the first half of the year.
+DROP FUNCTION IF EXISTS get_top_customers_with_most_purchases_first_half_year(integer);
+CREATE FUNCTION get_top_customers_with_most_purchases_first_half_year(year INT)
+RETURNS TABLE(
+    customer_number BIGINT,
+    contact_firstname VARCHAR,
+    contact_lastname VARCHAR,
+    total_orders BIGINT
+    ) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        c.customer_number,
+        c.contact_firstname,
+        c.contact_lastname,
+        COUNT(o.order_number) AS total_orders
+    FROM
+        customers c
+    JOIN
+        orders o ON c.customer_number = o.customer_number
+    WHERE
+        o.shipped_date BETWEEN make_date(year, 1, 1) AND make_date(year, 6, 30)
+    GROUP BY
+        c.customer_number, c.contact_firstname, c.contact_lastname
+    ORDER BY
+        total_orders DESC
+    LIMIT 10;
+END;
+$$ LANGUAGE plpgsql;
+
+/*
+Function to calculate the monthly profit by city in the given year.
+Description:
+This function calculates the total profit from all products for each city every month in the given year,
+considering any discounts applied to those products.
+The profit is calculated as the difference between the selling price and the buy price,
+adjusted for any discounts applied. The results are grouped by city and month and total profit.
+*/
+DROP FUNCTION IF EXISTS get_monthly_profit_by_city(INT);
+CREATE FUNCTION get_monthly_profit_by_city(year INT)
+RETURNS TABLE(city VARCHAR, Month TEXT, total_profit NUMERIC(10,2)) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        c.city,
+        TO_CHAR(DATE_TRUNC('month', o.shipped_date),'Month') AS Month,
+        SUM(
+            (od.price_each - COALESCE(ob.buy_price, 0) -
+            CASE
+                WHEN o.order_date BETWEEN pd.date_created AND pd.valid_until THEN
+                    CASE
+                        WHEN pd.discount_unit = 'P' THEN (pd.discount_value / 100.0) * od.price_each
+                        WHEN pd.discount_unit = 'A' THEN pd.discount_value
+                        ELSE 0
+                    END
+                ELSE 0
+            END) * od.quantity_ordered
+        )::numeric(10, 2) AS total_profit
+    FROM
+        customers c
+    JOIN
+        orders o ON c.customer_number = o.customer_number
+    JOIN
+        order_details od ON o.order_number = od.order_number
+    LEFT JOIN
+        production.products_discount pd ON od.product_code = pd.product_code
+    LEFT JOIN
+        office_buys ob ON od.product_code = ob.product_code
+    WHERE
+        o.shipped_date BETWEEN make_date(year, 1, 1) AND make_date(year, 12, 31)
+    GROUP BY
+        c.city, DATE_TRUNC('month', o.shipped_date)
+    ORDER BY
+        c.city, DATE_TRUNC('month', o.shipped_date), "total_profit" DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+
 --Function to retrieve a report of product changes within a specified time frame.
-CREATE OR REPLACE FUNCTION production.get_product_changes_report(start_date TIMESTAMP, end_date TIMESTAMP)
+DROP FUNCTION IF EXISTS production.get_product_changes_report(TIMESTAMP, TIMESTAMP);
+CREATE FUNCTION production.get_product_changes_report(start_date TIMESTAMP, end_date TIMESTAMP)
 RETURNS TABLE (
     the_product_code VARCHAR(15),
     the_product_name VARCHAR(70),
     the_change_count BIGINT
-) AS $$
+    ) AS $$
 BEGIN
     RETURN QUERY
     WITH all_changes AS (
@@ -69,5 +148,41 @@ BEGIN
     FROM changes_count c
     JOIN production.products p ON c.product_code = p.product_code
     ORDER BY c.change_count DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+DROP FUNCTION IF EXISTS get_most_profitable_products(DATE);
+CREATE OR REPLACE FUNCTION get_most_profitable_products(month_date DATE)
+RETURNS TABLE(product_code VARCHAR, total_profit NUMERIC) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        od.product_code,
+        SUM(
+            (od.price_each - COALESCE(ob.buy_price, 0) -
+            CASE
+                WHEN pd.discount_unit = 'P' THEN (pd.discount_value / 100.0) * od.price_each
+                WHEN pd.discount_unit = 'A' THEN pd.discount_value
+                ELSE 0
+            END) * od.quantity_ordered
+        )::numeric(10, 2) AS total_profit
+    FROM
+        order_details od
+    JOIN
+        orders o ON od.order_number = o.order_number
+    LEFT JOIN
+        office_buys ob ON od.product_code = ob.product_code
+    LEFT JOIN
+        production.products_discount pd ON od.product_code = pd.product_code
+        AND o.order_date BETWEEN pd.date_created AND pd.valid_until
+    WHERE
+        DATE_TRUNC('month', o.shipped_date) = DATE_TRUNC('month', month_date)
+        AND o.status = 'Shipped'
+    GROUP BY
+        od.product_code
+    ORDER BY
+        total_profit DESC;
 END;
 $$ LANGUAGE plpgsql;

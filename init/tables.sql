@@ -100,7 +100,8 @@ CREATE TABLE IF NOT EXISTS production.products
     quantity_in_stock     BIGINT      NOT NULL,
     product_category_code VARCHAR(15)
         CONSTRAINT products_fk_1
-            REFERENCES production.product_categories
+            REFERENCES production.product_categories,
+    is_deleted BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS production.products_comments
@@ -138,6 +139,7 @@ CREATE TABLE IF NOT EXISTS production.products_discount
    date_created           TIMESTAMP      NOT NULL,
     valid_until           TIMESTAMP      NOT NULL,
     discount_description  TEXT,
+    in_active             BOOLEAN DEFAULT TRUE,
     CONSTRAINT product_discount_unique UNIQUE (product_code,date_created, valid_until)
 );
 
