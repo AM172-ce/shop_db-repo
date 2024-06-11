@@ -128,7 +128,6 @@ def generate_customers(n, employee_numbers):
     return pd.DataFrame(customers)
 
 # Generate orders data
-
 def generate_orders(n, customer_numbers):
     orders = []
     for _ in range(n):
@@ -301,7 +300,8 @@ def generate_products_discount(n, product_codes, discount_unit_codes):
             'discount_unit': random.choice(discount_unit_codes),
             'date_created': date_created,
             'valid_until': valid_until,
-            'discount_description': fake.text()
+            'discount_description': fake.text(),
+            'in_active': valid_until >= today
         }
         discounts.append(discount)
     return pd.DataFrame(discounts)
