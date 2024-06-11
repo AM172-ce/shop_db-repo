@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Product Discount</title>
+</head>
+<body>
+    <h1>Update Product Discount</h1>
+    <form id="productDiscountForm">
+        <label for="product_code">Product Code:</label>
+        <input type="text" id="product_code" name="product_code" required><br><br>
+
+        <label for="action">Select Action:</label>
+        <select id="action" name="action" required>
+            <option value="">Select Action</option>
+            <option value="1">Change Discount Value or Unit</option>
+            <option value="2">Change Discount Description</option>
+        </select><br><br>
+
+        <div id="valueUnitFields" style="display: none;">
+            <label for="discount_value">Discount Value:</label>
+            <input type="number" id="discount_value" name="discount_value"><br><br>
+
+            <label for="discount_unit">Discount Unit:</label>
+            <input type="text" id="discount_unit" name="discount_unit"><br><br>
+        </div>
+
+        <div id="descriptionField" style="display: none;">
+            <label for="discount_description">Discount Description:</label><br>
+            <textarea id="discount_description" name="discount_description" rows="4" cols="50"></textarea><br><br>
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById('action').addEventListener('change', function() {
+            var selectedAction = document.getElementById('action').value;
+            var valueUnitFieldsDiv = document.getElementById('valueUnitFields');
+            var descriptionFieldDiv = document.getElementById('descriptionField');
+
+            if (selectedAction === '1') {
+                valueUnitFieldsDiv.style.display = 'block';
+                descriptionFieldDiv.style.display = 'none';
+            } else if (selectedAction === '2') {
+                valueUnitFieldsDiv.style.display = 'none';
+                descriptionFieldDiv.style.display = 'block';
+            } else {
+                valueUnitFieldsDiv.style.display = 'none';
+                descriptionFieldDiv.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

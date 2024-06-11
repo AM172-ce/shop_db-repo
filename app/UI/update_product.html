@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Product</title>
+</head>
+<body>
+    <h1>Update Product</h1>
+    <form id="updateProductForm">
+        <label for="product_code">Product Code:</label>
+        <input type="text" id="product_code" name="product_code" required><br><br>
+        
+        <label for="name">New Name:</label>
+        <input type="text" id="name" name="name"><br><br>
+        
+        <label for="vendor">New Vendor:</label>
+        <input type="text" id="vendor" name="vendor"><br><br>
+        
+        <label for="description">New Description:</label>
+        <textarea id="description" name="description" rows="4" cols="50"></textarea><br><br>
+
+        <input type="submit" value="Update Product">
+    </form>
+
+    <script>
+        document.getElementById("updateProductForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Collect form data with correct field names
+            var formData = new FormData();
+            formData.append("product_code", document.getElementById("product_code").value);
+            formData.append("name", document.getElementById("name").value);
+            formData.append("vendor", document.getElementById("vendor").value);
+            formData.append("description", document.getElementById("description").value);
+
+            // Send POST request to backend API endpoint
+            fetch("/api/fundamental_update_product", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // Log response from backend
+                // You can handle the response here (e.g., display a success message)
+            })
+            .catch(error => {
+                console.error("Error:", error); // Log any errors
+                // You can handle errors here (e.g., display an error message)
+            });
+        });
+    </script>
+</body>
+</html>
