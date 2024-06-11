@@ -1,0 +1,14 @@
+#commands to share a folder between vm linux and host system
+# Create a mount point
+sudo mkdir -p /mnt/shared
+
+# Load the vboxsf module
+sudo modprobe vboxsf
+
+# Mount the shared folder
+sudo mount -t vboxsf shop_db-repo /mnt/shared
+
+# Navigate to the shared folder
+cd /mnt/shared
+
+
