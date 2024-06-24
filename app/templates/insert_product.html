@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Product</title>
+    
+</head>
+<body>
+    <h1>Add New Product</h1>
+    <form id="productForm">
+        <label for="product_name">Product Name:</label>
+        <input type="text" id="product_name" name="product_name" placeholder="Product Name" required><br>
+
+        <label for="product_vendor">Product Vendor:</label>
+        <input type="text" id="product_vendor" name="product_vendor" placeholder="Product Vendor" required><br>
+
+        <label for="product_description">Product Description:</label><br>
+        <textarea type="text" id="product_description" name="product_description" placeholder="Product Description" rows="4" cols="50" required></textarea><br>
+
+        <label for="quantity_in_stock">Quantity in Stock:</label>
+        <input type="number" id="quantity_in_stock" name="quantity_in_stock" placeholder="Quantity In Stock" min="10" required><br>
+
+        <label for="product_category_code">Product Category Code:</label>
+        <input type="text" id="product_category_code" name="product_category_code" placeholder="Product Category Code" required><br>
+
+        <label for="base_price">Base Price:</label>
+        <input type="number" id="base_price" name="base_price" placeholder="Base Price" step="0.01" min="0" required><br>
+
+        <label for="msrp">MSRP:</label>
+        <input type="number" id="msrp" name="msrp" placeholder="MSRP" step="0.01" min="0" required><br>
+
+        <label for="office_code"></label>
+        <input type="text" name="office_code" id="office_code" placeholder="Office Code" required><br>
+
+        <button type="submit">Add Product</button>
+    </form>
+
+    <div id="responseMessage"></div>
+
+
+    <script src = "/static/scripts_insert_product.js"></script>
+</body>
+</html>

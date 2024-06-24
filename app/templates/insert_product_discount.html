@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product Discount</title>
+</head>
+<body>
+    <h1>Add Product Discount</h1>
+    <form action="/api/insert_product_discount" method="post" id="productDiscountForm">
+        <label for="product_code">Product Code:</label>
+        <input type="text" id="product_code" name="product_code" required><br><br>
+        
+        <label for="discount_value">Discount Value:</label>
+        <input type="number" id="discount_value" name="discount_value" step="0.01" min="0" required><br><br>
+        
+        <label for="discount_unit">Discount Unit:</label>
+        <select id="discount_unit" name="discount_unit" required>
+            <option value="P">Percentage</option>
+            <option value="A">Amount</option>
+        </select><br><br>
+        
+        <label for="valid_until">Valid Until:</label>
+        <input type="date" id="valid_until" name="valid_until" placeholder="YYYY-MM-DD"><br><br>
+        
+        <label for="discount_description">Discount Description:</label><br>
+        <textarea id="discount_description" name="discount_description" rows="4" cols="50"></textarea><br><br>
+
+        <div id="existingDiscount" style="display: none;">
+            <h3>Existing Active Discount</h3>
+            <p id="discountInfo"></p>
+            <h4>Deactivate?</h4>
+            <label for="deactivate">Yes</label>
+            <input type="radio" id="deactivate" name="action" value="deactivate">
+            <label for="keep">No</label>
+            <input type="radio" id="keep" name="action" value="keep">
+        </div>
+
+
+        <input type="submit" value="Submit">
+    </form>
+
+    <div id="responseMessage"></div>
+    
+    <script src ="/static/scripts_insert_product_discount.js"></script>
+</body>
+</html>
+
+
