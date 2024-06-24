@@ -108,6 +108,7 @@ BEGIN
         office_buys ob ON od.product_code = ob.product_code
     WHERE
         o.shipped_date BETWEEN make_date(year, 1, 1) AND make_date(year, 12, 31)
+      AND pd.in_active = TRUE
     GROUP BY
         c.city, DATE_TRUNC('month', o.shipped_date)
     ORDER BY
@@ -153,8 +154,8 @@ $$ LANGUAGE plpgsql;
 
 
 
-DROP FUNCTION IF EXISTS get_most_profitable_products(DATE);
-CREATE OR REPLACE FUNCTION get_most_profitable_products(month_date DATE)
+DROP FUNCTION IF EXISTS most_profitable_products(DATE);
+CREATE OR REPLACE FUNCTION most_profitable_products(month_date DATE)
 RETURNS TABLE(product_code VARCHAR, total_profit NUMERIC) AS $$
 BEGIN
     RETURN QUERY
@@ -177,11 +178,21 @@ BEGIN
     LEFT JOIN
         production.products_discount pd ON od.product_code = pd.product_code
         AND o.order_date BETWEEN pd.date_created AND pd.valid_until
+        AND pd.in_active =TRUE
     WHERE
         DATE_TRUNC('month', o.shipped_date) = DATE_TRUNC('month', month_date)
-        AND o.status = 'Shipped'
+      AND o.status = 'Shipped'
     GROUP BY
         od.product_code
+    HAVING
+        SUM(
+            (od.price_each - COALESCE(ob.buy_price, 0) -
+            CASE
+                WHEN pd.discount_unit = 'P' THEN (pd.discount_value / 100.0) * od.price_each
+                WHEN pd.discount_unit = 'A' THEN pd.discount_value
+                ELSE 0
+            END) * od.quantity_ordered
+        ) > 0
     ORDER BY
         total_profit DESC;
 END;

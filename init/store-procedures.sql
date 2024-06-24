@@ -35,7 +35,7 @@ BEGIN
 END;
 $$;
 
---store-prcedure to calculate yearly customers who had the most discounts.
+--store-procedure to calculate yearly customers who had the most discounts.
 CREATE OR REPLACE PROCEDURE calculate_yearly_customer_discounts()
 LANGUAGE plpgsql
 AS $$
@@ -69,6 +69,7 @@ BEGIN
     LEFT JOIN
         production.products_discount pd ON od.product_code = pd.product_code
         AND o.order_date BETWEEN pd.date_created AND pd.valid_until
+        AND pd.in_active =TRUE
     WHERE
         o.status = 'Shipped'
         AND o.shipped_date BETWEEN CURRENT_DATE - INTERVAL '1 year' AND CURRENT_DATE
@@ -87,8 +88,37 @@ BEGIN
 END;
 $$;
 
--- Call the procedure
+
 CALL calculate_yearly_customer_discounts();
 
--- Retrieve the results
 SELECT * FROM temp_yearly_customer_discounts;
+
+
+CREATE OR REPLACE PROCEDURE get_most_profitable_products(IN month_date date)
+    language plpgsql
+AS
+$$
+DECLARE
+    record RECORD;
+BEGIN
+    DROP TABLE IF EXISTS temp_most_profitable_products;
+    CREATE TEMP TABLE temp_most_profitable_products (
+        product_code VARCHAR,
+        total_profit NUMERIC
+    );
+
+  
+    FOR record IN
+        SELECT * FROM most_profitable_products(month_date)
+    LOOP
+        INSERT INTO temp_most_profitable_products (product_code, total_profit)
+        VALUES (record.product_code, record.total_profit);
+
+        
+        RAISE NOTICE 'Product Code: %, Total Profit: %', record.product_code, record.total_profit;
+    END LOOP;
+END;
+$$;
+
+CALL get_most_profitable_products('2024-5-6');
+SELECT * FROM temp_most_profitable_products;

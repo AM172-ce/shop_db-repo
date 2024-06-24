@@ -165,7 +165,7 @@ CREATE TABLE IF NOT EXISTS production.products_pricing
 (
     products_pricing_code BIGINT         NOT NULL
         PRIMARY KEY,
-    products_code         VARCHAR(15)    NOT NULL
+    product_code         VARCHAR(15)    NOT NULL
         CONSTRAINT products_pricing_fk_1
             REFERENCES production.products,
     base_price            NUMERIC(10, 2) NOT NULL,
@@ -206,3 +206,5 @@ CREATE TABLE IF NOT EXISTS office_buys
         CONSTRAINT office_buys_fk_2
             REFERENCES offices
 );
+
+SELECT setval('public.office_buys_office_buy_code_seq', (SELECT MAX(office_buy_code) FROM public.office_buys));

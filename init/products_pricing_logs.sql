@@ -22,13 +22,13 @@ RETURNS TRIGGER AS $$
 BEGIN
     IF TG_OP = 'DELETE' THEN
         INSERT INTO logs.product_pricing_changes_log (product_code, operation_type, user_id, old_base_price, old_date_created, old_date_expiry, old_in_active, old_msrp)
-        VALUES (OLD.products_code, 'DELETE', current_user, OLD.base_price, OLD.date_created, OLD.date_expiry, OLD.in_active, OLD.msrp);
+        VALUES (OLD.product_code, 'DELETE', current_user, OLD.base_price, OLD.date_created, OLD.date_expiry, OLD.in_active, OLD.msrp);
     ELSIF TG_OP = 'UPDATE' THEN
         INSERT INTO logs.product_pricing_changes_log (product_code, operation_type, user_id, old_base_price, old_date_created, old_date_expiry, old_in_active, old_msrp, new_base_price, new_date_created, new_date_expiry, new_in_active, new_msrp)
-        VALUES (NEW.products_code, 'UPDATE', current_user, OLD.base_price, OLD.date_created, OLD.date_expiry, OLD.in_active, OLD.msrp, NEW.base_price, NEW.date_created, NEW.date_expiry, NEW.in_active, NEW.msrp);
+        VALUES (NEW.product_code, 'UPDATE', current_user, OLD.base_price, OLD.date_created, OLD.date_expiry, OLD.in_active, OLD.msrp, NEW.base_price, NEW.date_created, NEW.date_expiry, NEW.in_active, NEW.msrp);
     ELSIF TG_OP = 'INSERT' THEN
         INSERT INTO logs.product_pricing_changes_log (product_code, operation_type, user_id, new_base_price, new_date_created, new_date_expiry, new_in_active, new_msrp)
-        VALUES (NEW.products_code, 'INSERT', current_user, NEW.base_price, NEW.date_created, NEW.date_expiry, NEW.in_active, NEW.msrp);
+        VALUES (NEW.product_code, 'INSERT', current_user, NEW.base_price, NEW.date_created, NEW.date_expiry, NEW.in_active, NEW.msrp);
     END IF;
     RETURN NEW;
 END;
