@@ -16,17 +16,17 @@ services:
 
   app:
     build:
-      context: ./app
+      context: ./
       dockerfile: Dockerfile
     depends_on:
       - db
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/shop
     volumes:
-      - /mnt/shared/app:/home/myuser/code 
+      - /mnt/shared:/home/myuser/code
       - /mnt/shared:/mnt/shared
     ports:
-     - "8080:8080"
+     - "8000:8000"
 
 volumes:
   db_data:
