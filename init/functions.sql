@@ -155,19 +155,18 @@ $$ LANGUAGE plpgsql;
 
 
 DROP FUNCTION IF EXISTS most_profitable_products(DATE);
-CREATE OR REPLACE FUNCTION most_profitable_products(month_date DATE)
+CREATE OR REPLACE FUNCTION most_profitable_products(the_date DATE)
 RETURNS TABLE(product_code VARCHAR, total_profit NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     SELECT
         od.product_code,
         SUM(
-            (od.price_each - COALESCE(ob.buy_price, 0) -
-            CASE
-                WHEN pd.discount_unit = 'P' THEN (pd.discount_value / 100.0) * od.price_each
-                WHEN pd.discount_unit = 'A' THEN pd.discount_value
-                ELSE 0
-            END) * od.quantity_ordered
+            (CASE
+                WHEN pd.discount_unit = 'P' THEN od.price_each * (pd.discount_value / 100.0)
+                WHEN pd.discount_unit = 'A' THEN od.price_each - pd.discount_value
+                ELSE od.price_each
+            END) - COALESCE(ob.buy_price, 0) * od.quantity_ordered
         )::numeric(10, 2) AS total_profit
     FROM
         order_details od
@@ -180,20 +179,153 @@ BEGIN
         AND o.order_date BETWEEN pd.date_created AND pd.valid_until
         AND pd.in_active =TRUE
     WHERE
-        DATE_TRUNC('month', o.shipped_date) = DATE_TRUNC('month', month_date)
+        o.shipped_date = the_date
       AND o.status = 'Shipped'
     GROUP BY
         od.product_code
     HAVING
         SUM(
-            (od.price_each - COALESCE(ob.buy_price, 0) -
-            CASE
-                WHEN pd.discount_unit = 'P' THEN (pd.discount_value / 100.0) * od.price_each
-                WHEN pd.discount_unit = 'A' THEN pd.discount_value
-                ELSE 0
-            END) * od.quantity_ordered
+            (CASE
+                WHEN pd.discount_unit = 'P' THEN od.price_each * (pd.discount_value / 100.0)
+                WHEN pd.discount_unit = 'A' THEN od.price_each - pd.discount_value
+                ELSE od.price_each
+            END) - COALESCE(ob.buy_price, 0) * od.quantity_ordered
         ) > 0
     ORDER BY
         total_profit DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION add_product_comment(
+    p_product_code VARCHAR(15),
+    p_customer_number BIGINT,
+    p_comment TEXT,
+    p_rate INTEGER
+)
+RETURNS TABLE(
+    product_code VARCHAR(15),
+    customer_number BIGINT,
+    comments TEXT,
+    rates INTEGER
+) AS $$
+BEGIN
+
+    INSERT INTO production.products_comments (product_code, customer_number, comments, rates)
+    VALUES (p_product_code, p_customer_number, p_comment, p_rate)
+    ON CONFLICT (product_code, customer_number) DO UPDATE
+    SET comments = EXCLUDED.comments,
+        rates = EXCLUDED.rates;
+
+    
+    RETURN QUERY
+    SELECT 
+        product_code,
+        customer_number,
+        comments,
+        rates
+    FROM production.products_comments
+    WHERE product_code = p_product_code
+      AND customer_number = p_customer_number;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION add_comment_agreement(
+    p_product_code VARCHAR(15),
+    p_comment_customer_number BIGINT,
+    p_customer_number BIGINT,
+    p_agreement BOOLEAN
+)
+RETURNS TABLE(
+    product_code VARCHAR(15),
+    comment_customer_number BIGINT,
+    agree_count INTEGER,
+    disagree_count INTEGER
+) AS $$
+BEGIN
+    
+    INSERT INTO production.comment_agreements (product_code, comment_customer_number, customer_number, agreement)
+    VALUES (p_product_code, p_comment_customer_number, p_customer_number, p_agreement)
+    ON CONFLICT (product_code, comment_customer_number, customer_number) DO UPDATE
+    SET agreement = EXCLUDED.agreement;
+
+    
+    RETURN QUERY
+    SELECT 
+        ca.product_code,
+        ca.comment_customer_number,
+        (SELECT COUNT(*) FROM production.comment_agreements 
+            WHERE product_code = ca.product_code 
+              AND comment_customer_number = ca.comment_customer_number 
+              AND agreement = TRUE) AS agree_count,
+        (SELECT COUNT(*) FROM production.comment_agreements 
+            WHERE product_code = ca.product_code 
+              AND comment_customer_number = ca.comment_customer_number 
+              AND agreement = FALSE) AS disagree_count
+    FROM production.comment_agreements ca
+    WHERE ca.product_code = p_product_code
+      AND ca.comment_customer_number = p_comment_customer_number
+    LIMIT 1;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION add_customer_order(
+    p_customer_number BIGINT,
+    p_required_date TIMESTAMP,
+    p_status VARCHAR(15),
+    p_comments TEXT,
+    p_order_details JSONB
+) RETURNS TABLE (
+    order_number BIGINT,
+    customer_number BIGINT,
+    product_code VARCHAR(15),
+    quantity_ordered BIGINT,
+    price_each NUMERIC(10, 2),
+    order_line_number INTEGER
+) AS $$
+DECLARE
+    v_order_number BIGINT;
+    v_order_line_number INTEGER;
+    order_detail JSONB;
+BEGIN
+    INSERT INTO orders (order_date, required_date, status, comments, customer_number)
+    VALUES (NOW(), p_required_date, p_status, p_comments, p_customer_number)
+    RETURNING order_number INTO v_order_number;
+
+
+    FOR order_detail IN SELECT * FROM jsonb_array_elements(p_order_details)
+    LOOP
+    
+        v_order_line_number := COALESCE(
+            (SELECT MAX(order_line_number) + 1 FROM order_details WHERE order_number = v_order_number),
+            1
+        );
+
+    
+        INSERT INTO order_details (order_number, product_code, quantity_ordered, price_each, order_line_number)
+        VALUES (
+            v_order_number,
+            order_detail->>'product_code',
+            (order_detail->>'quantity_ordered')::BIGINT,
+            (order_detail->>'price_each')::NUMERIC(10, 2),
+            v_order_line_number
+        );
+
+        RETURN QUERY 
+        SELECT v_order_number, 
+               p_customer_number, 
+               order_detail->>'product_code', 
+               (order_detail->>'quantity_ordered')::BIGINT, 
+               (order_detail->>'price_each')::NUMERIC(10, 2), 
+               v_order_line_number;
+    END LOOP;
+
+    RETURN;
+EXCEPTION
+    WHEN OTHERS THEN
+        
+        RAISE EXCEPTION 'Error inserting order: %', SQLERRM;
 END;
 $$ LANGUAGE plpgsql;
