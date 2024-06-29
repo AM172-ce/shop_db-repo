@@ -179,7 +179,7 @@ BEGIN
         AND o.order_date BETWEEN pd.date_created AND pd.valid_until
         AND pd.in_active =TRUE
     WHERE
-        o.shipped_date = the_date
+        (DATE_TRUNC('month', o.shipped_date) = (DATE_TRUNC('month', the_date)
       AND o.status = 'Shipped'
     GROUP BY
         od.product_code
