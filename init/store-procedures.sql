@@ -94,7 +94,7 @@ CALL calculate_yearly_customer_discounts();
 SELECT * FROM temp_yearly_customer_discounts;
 
 
-CREATE OR REPLACE PROCEDURE get_most_profitable_products(IN month_date date)
+CREATE OR REPLACE PROCEDURE get_most_profitable_products(IN the_date date)
     language plpgsql
 AS
 $$
@@ -109,7 +109,7 @@ BEGIN
 
   
     FOR record IN
-        SELECT * FROM most_profitable_products(month_date)
+        SELECT * FROM most_profitable_products(the_date)
     LOOP
         INSERT INTO temp_most_profitable_products (product_code, total_profit)
         VALUES (record.product_code, record.total_profit);
@@ -122,3 +122,7 @@ $$;
 
 CALL get_most_profitable_products('2024-5-6');
 SELECT * FROM temp_most_profitable_products;
+
+
+
+
